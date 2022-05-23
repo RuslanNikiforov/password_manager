@@ -38,7 +38,7 @@ class ApplicationPasswordServiceImplTest {
     @Test
     void create() {
         ApplicationPassword newApplicationPassword = getNew();
-        ApplicationPassword created = service.save(newApplicationPassword, SECOND_USER_ID);
+        ApplicationPassword created = service.save(getNew(), SECOND_USER_ID);
         newApplicationPassword.setId(created.getId());
         AssertApplicationPasswordHelper.isEqual(newApplicationPassword, created);
     }
@@ -47,7 +47,7 @@ class ApplicationPasswordServiceImplTest {
     void update() {
         ApplicationPassword existingApplicationPassword = getExisting();
         ApplicationPassword updatedApplicationPassword = service.save(existingApplicationPassword, FIRST_USER_ID);
-        AssertApplicationPasswordHelper.isEqual(existingApplicationPassword, updatedApplicationPassword);
+        AssertApplicationPasswordHelper.isEqual(getExisting(), updatedApplicationPassword);
 
     }
 }

@@ -10,12 +10,12 @@ VALUES ('example1@mail.com', 'Alex', '$2a$05$rcwKfTdM1AZBo02tfRRmc.9PL2KTyAsCKzA
     ('example5@mail.com', 'Victor', '$2a$05$NTHHpxz3tvrnLThdcd9oyOa1IqKicnSj.Qx7a2wOZ63qlS4BJNfMy');
 
 INSERT INTO app_passwords (app_name,  password, user_id)
-VALUES ('Steam', '12345', 1),
-       ('AliExpress', 'qwerty', 1),
-       ('Mail.ru', 'qwerty_mail', 4),
-       ('Google.com', 'qwerty289', 4),
-       ('test.com', 'password', 4),
-       ('Steam', '12345', 2);
+VALUES ('Steam', 'kSfOMKECitlLqYX8AxhNMw==', 1),
+       ('AliExpress', 'Cx5GuQ2dWZt/f2KqVJg3Sw==', 1),
+       ('Mail.ru', 'xPMezRKlRtjwhE9NFv84LBOAb/GR1y2P', 4),
+       ('Google.com', 'SuYPJ/sCWaen60iTLEmt8fqn4KAHYOLD', 4),
+       ('test.com', 'XETfSmUDiXYP1k4p559Qqo47HyHKqgF3', 4),
+       ('Steam', 'vVaG0TqQJKsTR6UExG29ww==', 2);
 
 
 INSERT INTO user_roles (role, user_id) VALUES ('USER', 1), ('ADMIN', 1),
@@ -23,5 +23,3 @@ INSERT INTO user_roles (role, user_id) VALUES ('USER', 1), ('ADMIN', 1),
                                               ('USER', 3),
                                               ('USER', 4),
                                               ('USER', 5);
-
-DELETE FROM user_roles where user_id = 1 and role = 'USER'

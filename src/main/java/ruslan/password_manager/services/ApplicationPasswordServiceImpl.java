@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import ruslan.password_manager.config.WebSecurityConfig;
 import ruslan.password_manager.entity.ApplicationPassword;
 import ruslan.password_manager.repository.ApplicationPasswordRepository;
 import ruslan.password_manager.repository.UserRepository;
@@ -25,6 +26,7 @@ public class ApplicationPasswordServiceImpl implements ApplicationPasswordServic
     }
 
     public List<ApplicationPassword> getAll(long userId) {
+
         return appPasswordRepository.findAllByUser_IdOrderByLastModifiedDesc(userId);
     }
 
@@ -40,6 +42,7 @@ public class ApplicationPasswordServiceImpl implements ApplicationPasswordServic
 
     @Override
     public ApplicationPassword save(ApplicationPassword applicationPassword, long userId) {
+        applicationPassword.setPassword(WebSecurityConfig.stringEncryptor().encrypt(applicationPassword.getPassword()));
         applicationPassword.setUser(userRepository.getById(userId));
         return appPasswordRepository.save(applicationPassword);
     }

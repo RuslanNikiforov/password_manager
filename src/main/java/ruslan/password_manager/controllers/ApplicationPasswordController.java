@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import ruslan.password_manager.config.WebSecurityConfig;
 import ruslan.password_manager.entity.ApplicationPassword;
 import ruslan.password_manager.entity.Role;
 import ruslan.password_manager.entity.User;
@@ -15,6 +16,7 @@ import ruslan.password_manager.services.ApplicationPasswordService;
 import javax.validation.Valid;
 import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Controller
 @RequestMapping("/passwords")
@@ -33,8 +35,11 @@ public class ApplicationPasswordController {
         if (user == null) {
             throw new UserPrincipalNotFoundException("UserPrincipalNotFound");
         }
-
-        model.addAttribute("app_passwords", service.getAll(user.getId()));
+        List<ApplicationPassword> applicationPasswordList = service.getAll(user.getId());
+        applicationPasswordList.forEach(applicationPassword ->
+                applicationPassword.setPassword(WebSecurityConfig.stringEncryptor().
+                        decrypt(applicationPassword.getPassword())));
+        model.addAttribute("app_passwords", applicationPasswordList);
         model.addAttribute("isAdmin", user.getRoles().contains(Role.ADMIN));
         return "passwords";
     }
@@ -53,7 +58,10 @@ public class ApplicationPasswordController {
 
     @GetMapping("/update/{id}")
     public String showUpdateForm(@PathVariable String id, Model model) {
-        model.addAttribute("app_password", service.get(Long.parseLong(id)));
+        ApplicationPassword applicationPassword = service.get(Long.parseLong(id));
+        applicationPassword.setPassword(WebSecurityConfig.stringEncryptor().
+                decrypt(applicationPassword.getPassword()));
+        model.addAttribute("app_password", applicationPassword);
         return "updatePassword";
     }
 

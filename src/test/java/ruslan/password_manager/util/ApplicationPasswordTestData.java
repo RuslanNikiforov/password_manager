@@ -1,5 +1,6 @@
 package ruslan.password_manager.util;
 
+import ruslan.password_manager.config.WebSecurityConfig;
 import ruslan.password_manager.entity.ApplicationPassword;
 
 import java.time.LocalDateTime;
@@ -8,6 +9,18 @@ import java.util.Collections;
 import java.util.List;
 
 public class ApplicationPasswordTestData {
+
+    public final static String PASSWORD1;
+
+    public final static String PASSWORD2;
+
+    public final static String PASSWORD3;
+
+    public final static String PASSWORD4;
+
+    public final static String PASSWORD5;
+
+    public final static String PASSWORD6;
 
     public final static long FIRST_USER_ID = 1;
 
@@ -35,6 +48,12 @@ public class ApplicationPasswordTestData {
     static {
         Collections.addAll(FIRST_USER_PASSWORDS, APPLICATION_PASSWORD1, APPLICATION_PASSWORD2);
         Collections.addAll(SECOND_USER_PASSWORDS, APPLICATION_PASSWORD3, APPLICATION_PASSWORD4, APPLICATION_PASSWORD5);
+        PASSWORD1 = WebSecurityConfig.stringEncryptor().encrypt("12345");
+        PASSWORD2 = WebSecurityConfig.stringEncryptor().encrypt("qwerty");
+        PASSWORD3 = WebSecurityConfig.stringEncryptor().encrypt("qwerty_mail");
+        PASSWORD4 = WebSecurityConfig.stringEncryptor().encrypt("qwerty289");
+        PASSWORD5 = WebSecurityConfig.stringEncryptor().encrypt("password");
+        PASSWORD6 = WebSecurityConfig.stringEncryptor().encrypt("12345");
     }
 
     public static ApplicationPassword getNew() {

@@ -4,7 +4,7 @@ import org.assertj.core.api.Assertions;
 
 public class AssertApplicationPasswordHelper {
     public static <T> void  isEqual(T expected, T actual) {
-        Assertions.assertThat(actual).usingRecursiveComparison().ignoringFields("user", "lastModified").
+        Assertions.assertThat(actual).usingRecursiveComparison().ignoringFields("user", "lastModified", "password").
                 isEqualTo(expected);
     }
 }

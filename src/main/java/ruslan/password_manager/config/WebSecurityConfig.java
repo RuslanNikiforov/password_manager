@@ -1,5 +1,7 @@
 package ruslan.password_manager.config;
 
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +25,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
 
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable().authorizeRequests().antMatchers( "/*.css", "/resources/**", "/signUp" , "/").
@@ -35,6 +38,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public static BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder(5);
+    }
+
+    @Bean
+    public static StandardPBEStringEncryptor stringEncryptor() {
+        SimpleStringPBEConfig config = new SimpleStringPBEConfig();
+        config.setPassword("secret");
+        StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+        encryptor.setConfig(config);
+        return encryptor;
     }
 
     @Autowired
