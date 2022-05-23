@@ -1,0 +1,36 @@
+html{
+    background-color: beige;
+}
+
+.wrapper{
+    margin-left: 10%;
+    background-color: cadetblue;
+    max-height: 500px;
+    max-width: 1200px;
+    display: flex;
+}
+
+h1{
+    margin-left: 40%;
+}
+
+.element_form{
+    padding: 30px;
+}
+
+.input_and_name{
+    margin: auto;
+}
+
+input {
+    width: 200px;
+    height: 50px;
+
+}
+
+.error-message{
+    max-width: 260px;
+    margin-top: 30px;
+    color: red;
+    text-align: center;
+}
