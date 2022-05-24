@@ -5,5 +5,6 @@ import ruslan.password_manager.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    public User findUserByEmail(String email);
+
+    User findUserByEmail(String email);
 }

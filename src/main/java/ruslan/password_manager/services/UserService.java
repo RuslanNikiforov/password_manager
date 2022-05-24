@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface UserService extends UserDetailsService {
 
-    public User getById(long id);
+    User getById(long id);
 
     User getByEmail(String email);
 
@@ -18,4 +18,6 @@ public interface UserService extends UserDetailsService {
     void delete(Long id);
 
     List<User> filterAndGetAll(String min_id, String max_id, String name, String email);
+
+    List<User> getAllWithAdmin();
 }

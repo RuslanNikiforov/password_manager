@@ -59,6 +59,10 @@ public class UserServiceImpl implements UserService{
                 filter(user -> user.getRoles().contains(Role.USER) && !user.getRoles().contains(Role.ADMIN)).collect(Collectors.toList());
     }
 
+    public List<User> getAllWithAdmin() {
+        return repository.findAll();
+    }
+
     @Override
     public void delete(Long id) {
         repository.deleteById(id);
