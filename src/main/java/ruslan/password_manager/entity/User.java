@@ -56,6 +56,9 @@ public class User implements UserDetails {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     List<ApplicationPassword> passwords;
 
+    @Transient
+    public boolean isAbleToSeePasswords;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles;
