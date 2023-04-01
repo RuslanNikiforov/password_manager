@@ -12,18 +12,18 @@
         <div class="element_form">
             <div class="input_and_name"><label>Название
                     приложения<input name="appName"
-                                      type="text" <#if appNameError?has_content> style="border-color: red"
-                                      value="" <#else>
-                                      value=${app_password.appName}</#if>></label></div>
+                                     type="text" <#if appNameError?has_content> style="border-color: red"
+                        value="" <#else>
+                        value=${app_password.appName}</#if>></label></div>
             <#if appNameError?has_content>
                 <div>${appNameError}</div></#if>
         </div>
         <div class="element_form">
             <div class="input_and_name"><label>Пароль<input name="password"
                                                             type="password" <#if passwordError?has_content>
-                                                            style="border-color: red"
-                                                            value="" <#else>
-                                                            value=${app_password.password}</#if>></label></div>
+                        style="border-color: red"
+                        value="" <#else>
+                        value=${app_password.password}</#if>></label></div>
             <#if passwordError?has_content>
                 <div>${passwordError}</div></#if>
         </div>

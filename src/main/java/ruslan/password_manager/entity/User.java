@@ -28,36 +28,36 @@ import java.util.Set;
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @NotBlank(message = "Имя не может быть пустым.")
     @Column(name = "name")
     @Size(min = 2, max = 32, message = "Введенное имя должно быть в пределах 2-32 символов.")
-    String name;
+    private String name;
 
 
     @Email(message = "Невалидный email.")
     @NotBlank(message = "Email не может быть пустым.")
     @Column(name = "email")
-    String email;
+    private String email;
 
     @NotBlank(message = "Пароль не может быть пустым.")
     @Size(min = 8, max = 64, message = "Введенный пароль должен содержать от 8 до 64 символов.")
     @Column(name = "password")
-    String password;
+    private String password;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles" , joinColumns = {@JoinColumn(name = "user_id")})
     @Column(table = "user_roles", name = "role")
-    Set<Role> roles = new HashSet<>();
+    private Set<Role> roles = new HashSet<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
-    List<ApplicationPassword> passwords;
+    private List<ApplicationPassword> passwords;
 
     @Transient
-    public boolean isAbleToSeePasswords;
+    private boolean isAbleToSeePasswords;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

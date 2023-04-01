@@ -14,11 +14,9 @@ import ruslan.password_manager.entity.ApplicationPassword;
 import ruslan.password_manager.entity.Role;
 import ruslan.password_manager.entity.User;
 import ruslan.password_manager.exceptions.IncorrectTokenException;
-import ruslan.password_manager.services.ApplicationPasswordService;
-import ruslan.password_manager.services.EmailServiceImpl;
-import ruslan.password_manager.services.UserServiceImpl;
-import ruslan.password_manager.services.UsersSessionService;
+import ruslan.password_manager.services.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.time.LocalDateTime;
@@ -36,27 +34,48 @@ public class ApplicationPasswordController {
 
     private final UsersSessionService usersSessionService;
 
+    private final PasswordGeneratorService passwordGeneratorService;
+
 
     @Autowired
     public ApplicationPasswordController(ApplicationPasswordService appPasswordService, EmailServiceImpl emailService,
-                                         UsersSessionService usersSessionService) {
+                                         UsersSessionService usersSessionService,
+                                         PasswordGeneratorService passwordGeneratorService) {
         this.appPasswordService = appPasswordService;
         this.emailService = emailService;
         this.usersSessionService = usersSessionService;
+        this.passwordGeneratorService = passwordGeneratorService;
     }
 
     @GetMapping()
-    public String getAll(Model model, @AuthenticationPrincipal User user) throws UserPrincipalNotFoundException {
+    public String getAll(Model model, @AuthenticationPrincipal User user,
+                         @RequestParam(name = "genPassLength", required = false) String genPassLength,
+                         @RequestParam(name = "appName", required = false, defaultValue = "") String appName,
+                         @RequestParam(name = "pageSize", required = false, defaultValue = "3") String pageSize,
+                         @RequestParam(name = "currentPage", required = false, defaultValue = "1") String currentPage)
+            throws UserPrincipalNotFoundException {
         if (user == null) {
             throw new UserPrincipalNotFoundException("UserPrincipalNotFound");
         }
-        List<ApplicationPassword> applicationPasswordList = appPasswordService.getAll(user.getId());
-        applicationPasswordList.forEach(applicationPassword ->
-                applicationPassword.setPassword(WebSecurityConfig.stringEncryptor().
-                        decrypt(applicationPassword.getPassword())));
-        model.addAttribute("app_passwords", applicationPasswordList);
-        model.addAttribute("user", user);
+        List<ApplicationPassword> applicationPasswordsList;
+        if(user.isAbleToSeePasswords()) {
+            applicationPasswordsList = appPasswordService.getAllAndSetDecryptedPassword(user.getId());
+        }
+        else {
+            applicationPasswordsList = appPasswordService.getAllWithoutPassword(user.getId());
+        }
+        applicationPasswordsList = appPasswordService.getAllFilteredByAppName(applicationPasswordsList, appName);
+        model.addAttribute("amount_of_pages",
+                Math.ceil((double) applicationPasswordsList.size() / Integer.parseInt(pageSize)));
+        applicationPasswordsList = appPasswordService.getAllOnThePage(applicationPasswordsList, pageSize, currentPage);
+        model.addAttribute("app_passwords", applicationPasswordsList);
+        model.addAttribute("isAbleToSeePasswords", user.isAbleToSeePasswords());
         model.addAttribute("isAdmin", user.getRoles().contains(Role.ADMIN));
+        model.addAttribute("username", user.getName());
+        if(genPassLength != null) {
+            String generatedPassword = passwordGeneratorService.generatePassayPassword(Integer.parseInt(genPassLength));
+            model.addAttribute("generatedPassword", generatedPassword);
+        }
         return "passwords";
     }
 
@@ -80,10 +99,17 @@ public class ApplicationPasswordController {
     }
 
     @GetMapping("/update/{id}")
-    public String showUpdateForm(@PathVariable String id, Model model) {
-        ApplicationPassword applicationPassword = appPasswordService.get(Long.parseLong(id));
-        applicationPassword.setPassword(WebSecurityConfig.stringEncryptor().
-                decrypt(applicationPassword.getPassword()));
+    public String showUpdateForm(@AuthenticationPrincipal User user, @PathVariable String id, Model model) {
+        ApplicationPassword applicationPassword;
+
+        applicationPassword = appPasswordService.get(Long.parseLong(id));
+        if(!user.isAbleToSeePasswords()) {
+            applicationPassword.setPassword("");
+        }
+        else {
+            applicationPassword.setPassword(WebSecurityConfig.stringEncryptor().
+                    decrypt(applicationPassword.getPassword()));
+        }
         model.addAttribute("app_password", applicationPassword);
         return "updatePassword";
     }
@@ -135,19 +161,35 @@ public class ApplicationPasswordController {
         model.addAttribute("isTokenSent", true);
         return "popUpToSendTokenInEmail";
     }
+
     @PostMapping("/checkToken")
-    public String checkToken(@ModelAttribute(name = "token") String token, @AuthenticationPrincipal User user) {
+    public String checkToken(@ModelAttribute(name = "token") String token, @AuthenticationPrincipal User user,
+                             Model model) {
         LOG.info("tokenGonnaBeChecked");
-        if(usersSessionService.getUsersTokens().get(user.getId()).equals(token)) {
-            LOG.info("Token is correct");
-            user.setAbleToSeePasswords(true);
-            return "redirect:/passwords";
+        try {
+            if (usersSessionService.getUsersTokens().get(user.getId()).equals(token)) {
+                LOG.info("Token is correct");
+                user.setAbleToSeePasswords(true);
+                return "redirect:/passwords";
+            } else {
+                LOG.info("Token incorrect. User Input Token -> " + token + " Actual token -> " +
+                        usersSessionService.getUsersTokens().get(user.getId()));
+                throw new IncorrectTokenException();
+            }
         }
-        else {
-            LOG.info("Token incorrect. User Input Token -> " + token + " Actual token -> " +
-                    usersSessionService.getUsersTokens().get(user.getId()));
-            throw new IncorrectTokenException();
+        catch (IncorrectTokenException e) {
+            model.addAttribute("hasError", true);
+            model.addAttribute("isTokenSent", true);
+            return "popUpToSendTokenInEmail";
         }
     }
+
+    @GetMapping("/export/excel")
+    public void exportToExcel(HttpServletResponse response, @AuthenticationPrincipal User user, Model model) {
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; filename=Application_Passwords" + ".xlsx");
+        appPasswordService.exportToExcel(appPasswordService.getAllAndSetDecryptedPassword(user.getId()), response);
+    }
+
 
 }

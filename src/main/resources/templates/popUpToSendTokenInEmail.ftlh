@@ -13,11 +13,20 @@
     <a href="/passwords/sendToken"><input type="submit" name="submit" id="submit" value="SendToken" disabled="disabled"></a>
     <form action="/passwords/checkToken" method="post" id="confirmTokenForm" style="display: block">
         <p> Token has been sent.</p>
-        <label>Token<input type="text" name="token"></label>
+        <script>
+            window.onload = function () {
+                <#if hasError?has_content>
+                var token = document.getElementById('Token');
+                token.style.borderColor = "red";
+                alert("Incorrect token!")
+                </#if>
+            }
+        </script>
+        <label>Token<input type="text" id="Token" name="token"></label>
         <input type="submit" name="checkToken" id="checkToken" value="CheckToken">
     </form>
-    <#else>
-        <a href="/passwords/sendToken"><input type="submit" name="submit" id="submit" value="SendToken"></a>
+<#else>
+    <a href="/passwords/sendToken"><input type="submit" name="submit" id="submit" value="SendToken"></a>
 </#if>
 </body>
 </html>
