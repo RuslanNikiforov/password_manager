@@ -23,24 +23,24 @@ import java.time.format.DateTimeFormatter;
 public class ApplicationPassword {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @NotBlank(message = "Не может быть пустым")
     @Column(name = "app_name")
-    String appName;
+    private String appName;
 
     @NotNull
     @Column(name = "last_modified")
-    LocalDateTime lastModified;
+    private LocalDateTime lastModified;
 
     @NotBlank(message = "Не может быть пустым")
     @Column(name = "password")
-    String password;
+    private String password;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(table = "app_passwords", name = "user_id")
     @NotNull
-    User user;
+    private User user;
 
     public String getFormattedLastModified() {
         return lastModified.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));

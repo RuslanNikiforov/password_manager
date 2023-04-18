@@ -3,6 +3,7 @@
 <html lang="ru">
 <head>
     <link rel="stylesheet" href="<@spring.url '/updatePassword.css'/>" type="text/css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"/>
     <title><#if app_password.id?has_content>Обновить пароль приложения<#else>Добавить пароль приложения</#if> </title>
 </head>
 <footer style="padding-bottom: 30px"><a href="/passwords">Назад</a></footer>
@@ -12,18 +13,18 @@
         <div class="element_form">
             <div class="input_and_name"><label>Название
                     приложения<input name="appName"
-                                      type="text" <#if appNameError?has_content> style="border-color: red"
-                                      value="" <#else>
-                                      value=${app_password.appName}</#if>></label></div>
+                                     type="text" <#if appNameError?has_content> style="border-color: red"
+                        value="" <#else>
+                        value=${app_password.appName}</#if>></label></div>
             <#if appNameError?has_content>
                 <div>${appNameError}</div></#if>
         </div>
         <div class="element_form">
             <div class="input_and_name"><label>Пароль<input name="password"
                                                             type="password" <#if passwordError?has_content>
-                                                            style="border-color: red"
-                                                            value="" <#else>
-                                                            value=${app_password.password}</#if>></label></div>
+                        style="border-color: red"
+                        value="" <#else>
+                        value=${app_password.password}</#if>></label></div>
             <#if passwordError?has_content>
                 <div>${passwordError}</div></#if>
         </div>

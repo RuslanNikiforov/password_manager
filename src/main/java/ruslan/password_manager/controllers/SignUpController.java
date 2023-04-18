@@ -9,7 +9,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import ruslan.password_manager.entity.Role;
+import ruslan.password_manager.entity.Privilege;
 import ruslan.password_manager.entity.User;
 import ruslan.password_manager.services.UserService;
 
@@ -34,10 +34,10 @@ public class SignUpController {
     @PostMapping("/signUp")
     public String registerUser(@Valid @ModelAttribute(name = "newUser") User user,
                                BindingResult bindingResult, Model model) {
-        if(!user.getPassword().matches("^[A-Za-z0-9_^&@!-]+$")) {
+        if(!user.getPassword().matches("^[A-Za-z0-9_^&@!-$#.]+$")) {
             FieldError passwordError = new FieldError("passwordError", "password",
                     "Символы могут содежрать только буквы латинского алфавита \n" +
-                    "[a-z, A-Z], цифры [0-9] и специальные символы _^&@!- .");
+                    "[a-z, A-Z], цифры [0-9] и специальные символы _^&@!-#$.");
             bindingResult.addError(passwordError);
         }
         if(service.getAllWithAdmin().stream().map(User::getEmail).toList().contains(user.getEmail())) {
@@ -63,7 +63,8 @@ public class SignUpController {
             }
             return "signUp";
         }
-        user.setRoles(Collections.singleton(Role.USER));
+        user.setPrivileges(Collections.singleton(Privilege.USER));
+        service.updatePassword(user, user.getPassword());
         service.saveUser(user);
         return "registrationSucceed";
     }

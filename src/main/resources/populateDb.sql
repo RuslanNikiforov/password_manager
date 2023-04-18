@@ -18,7 +18,7 @@ VALUES ('Steam', 'kSfOMKECitlLqYX8AxhNMw==', 1),
        ('Steam', 'vVaG0TqQJKsTR6UExG29ww==', 2);
 
 
-INSERT INTO user_roles (role, user_id) VALUES ('USER', 1), ('ADMIN', 1),
+INSERT INTO user_roles (role, user_id) VALUES ('READ_APP_PASSWORDS', 3), ('USER', 1), ('ADMIN', 1),
                                               ('USER', 2),
                                               ('USER', 3),
                                               ('USER', 4),

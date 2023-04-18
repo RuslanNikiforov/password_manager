@@ -8,8 +8,11 @@ import ruslan.password_manager.config.WebSecurityConfig;
 import ruslan.password_manager.entity.ApplicationPassword;
 import ruslan.password_manager.repository.ApplicationPasswordRepository;
 import ruslan.password_manager.repository.UserRepository;
+import ruslan.password_manager.util.ApplicationPasswordsExcelExport;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ApplicationPasswordServiceImpl implements ApplicationPasswordService {
@@ -26,8 +29,42 @@ public class ApplicationPasswordServiceImpl implements ApplicationPasswordServic
     }
 
     public List<ApplicationPassword> getAll(long userId) {
-
         return appPasswordRepository.findAllByUser_IdOrderByLastModifiedDesc(userId);
+    }
+
+    @Override
+    public List<ApplicationPassword> getAllWithoutPassword(long userId) {
+        var list = appPasswordRepository.findAllByUser_IdOrderByLastModifiedDesc(userId);
+        list.forEach(applicationPassword -> applicationPassword.setPassword(""));
+        return list;
+    }
+
+    @Override
+    public List<ApplicationPassword> getAllFilteredByAppName(List<ApplicationPassword> appPasswords, String appName) {
+        var filteredPasswords = appPasswords.stream();
+        if (!appName.equals("")) {
+             filteredPasswords = filteredPasswords.filter(applicationPassword ->
+                    applicationPassword.getAppName().toUpperCase().contains(appName.toUpperCase()));
+        }
+        return filteredPasswords.collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ApplicationPassword> getAllOnThePage(List<ApplicationPassword> appPasswords,
+                                                     String pageSize, String currentPage) {
+        int pageSizeNumber = Integer.parseInt(pageSize);
+        int currentPageNumber = Integer.parseInt(currentPage);
+        return appPasswords.stream().skip((long) (currentPageNumber - 1) * pageSizeNumber).
+                limit(pageSizeNumber).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ApplicationPassword> getAllAndSetDecryptedPassword(long userId) {
+        List<ApplicationPassword> applicationPasswordsList = getAll(userId);
+        applicationPasswordsList.forEach(applicationPassword ->
+                applicationPassword.setPassword(WebSecurityConfig.stringEncryptor().
+                        decrypt(applicationPassword.getPassword())));
+        return applicationPasswordsList;
     }
 
     @Override
@@ -59,5 +96,11 @@ public class ApplicationPasswordServiceImpl implements ApplicationPasswordServic
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void exportToExcel(List<ApplicationPassword> applicationPasswords, HttpServletResponse response) {
+        ApplicationPasswordsExcelExport excelExport = new ApplicationPasswordsExcelExport(applicationPasswords);
+        excelExport.export(response);
     }
 }
