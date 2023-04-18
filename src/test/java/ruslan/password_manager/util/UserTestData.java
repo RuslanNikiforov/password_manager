@@ -3,7 +3,7 @@ package ruslan.password_manager.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ruslan.password_manager.config.WebSecurityConfig;
-import ruslan.password_manager.entity.Role;
+import ruslan.password_manager.entity.Privilege;
 import ruslan.password_manager.entity.User;
 
 import java.util.ArrayList;
@@ -19,15 +19,15 @@ public class UserTestData {
     public final static String user4_password;
     public final static String user5_password;
     public final static User USER_1 = new User(2L, "Misha","example2@mail.com",
-            "$2a$05$SAdwkv4GXf0jUuSPppNJz.eRILbyPd.fcis3IjlT.yfsVY9WWNhvK", Collections.singleton(Role.USER));
+            "$2a$05$SAdwkv4GXf0jUuSPppNJz.eRILbyPd.fcis3IjlT.yfsVY9WWNhvK", Collections.singleton(Privilege.USER));
     public final static User USER_2 = new User(3L, "Ruslan","example3@mail.com",
-            "$2a$05$I0yAgHFcjlJnmRb1dqLSxuv664NA9IhGIlZr5Eq9Ux57ge3n6sWHW", Collections.singleton(Role.USER));
+            "$2a$05$I0yAgHFcjlJnmRb1dqLSxuv664NA9IhGIlZr5Eq9Ux57ge3n6sWHW", Collections.singleton(Privilege.USER));
 
     public final static User USER_3 = new User(4L, "Dasha","example4@mail.com",
-            "$2a$05$2yfvxQzLW0vFzDtXBlFtROhD2ujvUrOMPBKgF5a9Xv6nYHiQlUanq", Collections.singleton(Role.USER));
+            "$2a$05$2yfvxQzLW0vFzDtXBlFtROhD2ujvUrOMPBKgF5a9Xv6nYHiQlUanq", Collections.singleton(Privilege.USER));
 
     public final static User USER_4 = new User(5L, "Victor","example5@mail.com",
-            "$2a$05$NTHHpxz3tvrnLThdcd9oyOa1IqKicnSj.Qx7a2wOZ63qlS4BJNfMy", Collections.singleton(Role.USER));
+            "$2a$05$NTHHpxz3tvrnLThdcd9oyOa1IqKicnSj.Qx7a2wOZ63qlS4BJNfMy", Collections.singleton(Privilege.USER));
 
     public final static List<User> USERS = new ArrayList<>();
 

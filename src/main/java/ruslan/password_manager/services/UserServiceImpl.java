@@ -7,11 +7,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import ruslan.password_manager.entity.Role;
+import ruslan.password_manager.entity.Privilege;
 import ruslan.password_manager.entity.User;
+import ruslan.password_manager.repository.ResetPasswordCodeRepository;
 import ruslan.password_manager.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -24,8 +27,24 @@ public class UserServiceImpl implements UserService{
     private UserRepository repository;
 
     @Autowired
+    private ResetPasswordCodeRepository codeRepository;
+
+    @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
+
+    public Set<Privilege> addAuthorities(List<Privilege> newAuthorities,
+                                                Set<Privilege> userAuthorities) {
+        userAuthorities.addAll(newAuthorities);
+        return userAuthorities;
+    }
+
+    public boolean removeAuthorities(List<Privilege> toRemoveAuthorities,
+                                            Set<Privilege> userAuthorities) {
+        int userAuthoritiesSize = userAuthorities.size();
+        toRemoveAuthorities.forEach(userAuthorities::remove);
+        return userAuthoritiesSize != userAuthorities.size();
+    }
 
     public User getById(long id) {
         return repository.findById(id).orElseThrow();
@@ -49,18 +68,37 @@ public class UserServiceImpl implements UserService{
 
 
     public User saveUser(User user){
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return repository.save(user);
+    }
+
+    @Override
+    public User updateUser(User user) {
         return repository.save(user);
     }
 
     @Override
     public List<User> getAll() {
         return repository.findAll().stream().
-                filter(user -> user.getRoles().contains(Role.USER) && !user.getRoles().contains(Role.ADMIN)).collect(Collectors.toList());
+                filter(user -> user.getAuthorities().contains(Privilege.USER) &&
+                        !user.getAuthorities().contains(Privilege.ADMIN)).collect(Collectors.toList());
     }
 
     public List<User> getAllWithAdmin() {
         return repository.findAll();
+    }
+
+    @Override
+    public Optional<User> getUserByPasswordResetCode(String code) {
+        return Optional.ofNullable(codeRepository.getByCode(code).getUser());
+    }
+
+    @Override
+    public boolean updatePassword(User user, String password) {
+        if(user == null || password == null) {
+            return false;
+        }
+        user.setPassword(passwordEncoder.encode(password));
+        return true;
     }
 
     @Override

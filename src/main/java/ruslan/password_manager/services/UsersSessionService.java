@@ -18,4 +18,8 @@ public class UsersSessionService {
     public void putToken(long id, String token) {
         usersTokens.put(id, token);
     }
+
+    public void deleteToken(long id) {
+        usersTokens.remove(id);
+    }
 }

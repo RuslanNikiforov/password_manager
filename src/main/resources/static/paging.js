@@ -21,3 +21,21 @@ function addParamsToUrlAndRefresh(value) {
     }
     window.location.href = url;
 }
+
+function setPageLinkFocused() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.has("currentPage")) {
+        let link = document.getElementById("btn-link" + urlParams.get("currentPage"));
+        link.style.color = "#0056b3"
+        link.style.textDecoration = "underline"
+        console.log(link);
+    }
+    else{
+        let link = document.getElementById("btn-link1")
+        link.focus();
+        link.style.color = "#0056b3"
+        link.style.textDecoration = "underline"
+        console.log(link);
+    }
+
+}

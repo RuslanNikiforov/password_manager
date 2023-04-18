@@ -11,7 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import ruslan.password_manager.config.WebSecurityConfig;
 import ruslan.password_manager.entity.ApplicationPassword;
-import ruslan.password_manager.entity.Role;
+import ruslan.password_manager.entity.Privilege;
 import ruslan.password_manager.entity.User;
 import ruslan.password_manager.exceptions.IncorrectTokenException;
 import ruslan.password_manager.services.*;
@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -28,9 +29,11 @@ public class ApplicationPasswordController {
 
     private final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
 
+    private final UserService userService;
+
     private final ApplicationPasswordService appPasswordService;
 
-    private final EmailServiceImpl emailService;
+    private final EmailService emailService;
 
     private final UsersSessionService usersSessionService;
 
@@ -38,13 +41,14 @@ public class ApplicationPasswordController {
 
 
     @Autowired
-    public ApplicationPasswordController(ApplicationPasswordService appPasswordService, EmailServiceImpl emailService,
+    public ApplicationPasswordController(ApplicationPasswordService appPasswordService, EmailService emailService,
                                          UsersSessionService usersSessionService,
-                                         PasswordGeneratorService passwordGeneratorService) {
+                                         PasswordGeneratorService passwordGeneratorService, UserService userService) {
         this.appPasswordService = appPasswordService;
         this.emailService = emailService;
         this.usersSessionService = usersSessionService;
         this.passwordGeneratorService = passwordGeneratorService;
+        this.userService = userService;
     }
 
     @GetMapping()
@@ -58,7 +62,7 @@ public class ApplicationPasswordController {
             throw new UserPrincipalNotFoundException("UserPrincipalNotFound");
         }
         List<ApplicationPassword> applicationPasswordsList;
-        if(user.isAbleToSeePasswords()) {
+        if(user.hasAuthority(Privilege.READ_APP_PASSWORDS)) {
             applicationPasswordsList = appPasswordService.getAllAndSetDecryptedPassword(user.getId());
         }
         else {
@@ -69,9 +73,6 @@ public class ApplicationPasswordController {
                 Math.ceil((double) applicationPasswordsList.size() / Integer.parseInt(pageSize)));
         applicationPasswordsList = appPasswordService.getAllOnThePage(applicationPasswordsList, pageSize, currentPage);
         model.addAttribute("app_passwords", applicationPasswordsList);
-        model.addAttribute("isAbleToSeePasswords", user.isAbleToSeePasswords());
-        model.addAttribute("isAdmin", user.getRoles().contains(Role.ADMIN));
-        model.addAttribute("username", user.getName());
         if(genPassLength != null) {
             String generatedPassword = passwordGeneratorService.generatePassayPassword(Integer.parseInt(genPassLength));
             model.addAttribute("generatedPassword", generatedPassword);
@@ -95,7 +96,7 @@ public class ApplicationPasswordController {
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         model.addAttribute("app_password", new ApplicationPassword());
-        return "updatePassword";
+        return "updateAppPassword";
     }
 
     @GetMapping("/update/{id}")
@@ -103,7 +104,7 @@ public class ApplicationPasswordController {
         ApplicationPassword applicationPassword;
 
         applicationPassword = appPasswordService.get(Long.parseLong(id));
-        if(!user.isAbleToSeePasswords()) {
+        if(!user.hasAuthority(Privilege.READ_APP_PASSWORDS)) {
             applicationPassword.setPassword("");
         }
         else {
@@ -111,7 +112,7 @@ public class ApplicationPasswordController {
                     decrypt(applicationPassword.getPassword()));
         }
         model.addAttribute("app_password", applicationPassword);
-        return "updatePassword";
+        return "updateAppPassword";
     }
 
     @PostMapping("")
@@ -126,7 +127,7 @@ public class ApplicationPasswordController {
                     "Приложение с данным названием уже существует"));
         }
         if (bindingResult.hasErrors() & appPasswordService.addErrorsToModel(bindingResult, model)) {
-            return "updatePassword";
+            return "updateAppPassword";
         }
         applicationPassword.setLastModified(LocalDateTime.now());
         appPasswordService.save(applicationPassword, user.getId());
@@ -142,7 +143,7 @@ public class ApplicationPasswordController {
             throw new UserPrincipalNotFoundException("UserPrincipalNotFound");
         }
         if (bindingResult.hasErrors() & appPasswordService.addErrorsToModel(bindingResult, model)) {
-            return "updatePassword";
+            return "updateAppPassword";
         }
         ApplicationPassword existing = appPasswordService.get(Long.parseLong(id));
         existing.setPassword(applicationPassword.getPassword());
@@ -169,7 +170,9 @@ public class ApplicationPasswordController {
         try {
             if (usersSessionService.getUsersTokens().get(user.getId()).equals(token)) {
                 LOG.info("Token is correct");
-                user.setAbleToSeePasswords(true);
+                user.setPrivileges(userService.addAuthorities(Collections.singletonList(Privilege.READ_APP_PASSWORDS),
+                        user.getPrivileges()));
+                userService.updateUser(user);
                 return "redirect:/passwords";
             } else {
                 LOG.info("Token incorrect. User Input Token -> " + token + " Actual token -> " +
@@ -185,7 +188,7 @@ public class ApplicationPasswordController {
     }
 
     @GetMapping("/export/excel")
-    public void exportToExcel(HttpServletResponse response, @AuthenticationPrincipal User user, Model model) {
+    public void exportToExcel(HttpServletResponse response, @AuthenticationPrincipal User user) {
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=Application_Passwords" + ".xlsx");
         appPasswordService.exportToExcel(appPasswordService.getAllAndSetDecryptedPassword(user.getId()), response);

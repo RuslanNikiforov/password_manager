@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
     <title>Администратор</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="../admin.css">
 </head>
 <body>
@@ -18,7 +19,7 @@
             <input type="submit" value="Фильтр">
         </form>
 
-        <table border="1">
+        <table class="table" border="1">
             <tr>
                 <th>ID</th>
                 <th>Имя</th>

@@ -24,7 +24,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
-@SecondaryTable(name = "user_roles", pkJoinColumns = @PrimaryKeyJoinColumn(name = "user_id", referencedColumnName = "id"))
+//@SecondaryTable(name = "user_roles", pkJoinColumns = @PrimaryKeyJoinColumn(name = "user_id", referencedColumnName = "id"))
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,17 +51,14 @@ public class User implements UserDetails {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles" , joinColumns = {@JoinColumn(name = "user_id")})
     @Column(table = "user_roles", name = "role")
-    private Set<Role> roles = new HashSet<>();
+    private Set<Privilege> privileges = new HashSet<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private List<ApplicationPassword> passwords;
 
-    @Transient
-    private boolean isAbleToSeePasswords;
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles;
+        return privileges;
     }
 
     @Override
@@ -89,11 +86,16 @@ public class User implements UserDetails {
         return true;
     }
 
-    public User(Long id, String name, String email, String password, Set<Role> roles) {
+    public User(Long id, String name, String email, String password, Set<Privilege> privileges) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
-        this.roles = roles;
+        this.privileges = privileges;
     }
+
+    public boolean hasAuthority(GrantedAuthority authority) {
+        return getAuthorities().contains(authority);
+    }
+
 }

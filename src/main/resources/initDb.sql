@@ -1,6 +1,8 @@
+drop table if exists user_code_reset_password;
 drop table if exists app_passwords;
 drop table if exists user_roles;
 drop table if exists users;
+
 
 create table users
 (id  serial not null primary key,
@@ -26,5 +28,15 @@ CREATE TABLE user_roles
     foreign key (user_id) references users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE user_code_reset_password(
+    id serial not null primary key,
+    code VARCHAR(255) NOT NULL,
+    sent_time timestamp NOT NULL,
+    user_id INTEGER NOT NULL,
+    foreign key (user_id) references users(id) ON DELETE CASCADE
+);
+
 CREATE unique index unique_appName on app_passwords(app_name, user_id);
-CREATE unique index unique_email on users(email)
+CREATE unique index unique_email on users(email);
+CREATE unique index unique_code on user_code_reset_password(code);
+CREATE unique index unique_user on user_code_reset_password(user_id);

@@ -34,7 +34,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable().authorizeRequests().antMatchers( "/*.css", "/resources/**", "/signUp" , "/").
                 permitAll().antMatchers("/passwords**").hasAuthority("USER").
-                antMatchers("/admin**").hasAuthority("ADMIN").anyRequest().authenticated().and().formLogin().loginPage("/login").
+                antMatchers("/admin**").hasAuthority("ADMIN").
+                antMatchers("/forgetPassword/savePassword**").hasAuthority("CHANGE_PASSWORD").
+                antMatchers("/forgetPassword**",
+                        "/forgetPassword/sendCode**", "/forgetPassword/reset**", "/forgetPassword/savePassword**").
+                permitAll().anyRequest().authenticated().and().formLogin().loginPage("/login").
                 permitAll().defaultSuccessUrl("/successful_Login").failureUrl("/failure-login").
                 and().logout().logoutUrl("/logout").logoutSuccessUrl("/").deleteCookies("JSESSIONID");
     }

@@ -3,6 +3,7 @@
 <html lang="ru">
 <head>
     <link rel="stylesheet" href="<@spring.url '/updatePassword.css'/>" type="text/css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"/>
     <title><#if app_password.id?has_content>Обновить пароль приложения<#else>Добавить пароль приложения</#if> </title>
 </head>
 <footer style="padding-bottom: 30px"><a href="/passwords">Назад</a></footer>

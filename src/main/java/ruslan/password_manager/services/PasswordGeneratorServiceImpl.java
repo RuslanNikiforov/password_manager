@@ -58,6 +58,6 @@ public class PasswordGeneratorServiceImpl implements PasswordGeneratorService{
 
     public void setMinimumChars(List<CharacterRule> characterRules, int passwordLength) {
         characterRules.forEach(characterRule ->
-                characterRule.setNumberOfCharacters(passwordLength / AMOUNT_OF_CHARACTER_RULES + 1));
+                characterRule.setNumberOfCharacters(passwordLength / (AMOUNT_OF_CHARACTER_RULES + 1)));
     }
 }
