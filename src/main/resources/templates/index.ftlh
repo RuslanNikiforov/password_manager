@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" type="text/css" href="../log_in.css">
+    <link rel="stylesheet" type="text/css" href="log_in.css">
     <title>Менеджер паролей</title>
 </head>
 <body>

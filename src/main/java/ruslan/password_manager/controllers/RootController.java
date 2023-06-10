@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class RootController {
 
-    @GetMapping("/koda/password-manager/")
+    @GetMapping("")
     public String root() {
         return "index";
     }
