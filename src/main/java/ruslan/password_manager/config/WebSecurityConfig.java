@@ -35,7 +35,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.cors().and().csrf().disable().authorizeRequests().antMatchers( "/*.css", "/resources/**", "/signUp" , "/").
+        http.cors().and().csrf().disable().requiresChannel(channel ->
+                        channel.anyRequest().requiresSecure()).
+                authorizeRequests().antMatchers( "/*.css", "/resources/**", "/signUp" , "/").
                 permitAll().antMatchers("/passwords**").hasAuthority("USER").
                 antMatchers("/admin**").hasAuthority("ADMIN").
                 antMatchers("/forgetPassword/savePassword**").hasAuthority("CHANGE_PASSWORD").
