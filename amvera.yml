@@ -8,6 +8,6 @@ build:
   args: -DskipTests
 
 run:
-  jarName: target/Password_manager-0.0.1-SNAPSHOT.jar
+  jarName: Password_manager-0.0.1-SNAPSHOT.jar
   containerPort: 8080
 
