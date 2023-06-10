@@ -1,5 +1,7 @@
 package ruslan.password_manager.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 @Service
 public class ApplicationPasswordServiceImpl implements ApplicationPasswordService {
 
+    private final static Logger LOG = LoggerFactory.getLogger(ApplicationPasswordServiceImpl.class);
 
     private ApplicationPasswordRepository appPasswordRepository;
 
@@ -102,5 +105,20 @@ public class ApplicationPasswordServiceImpl implements ApplicationPasswordServic
     public void exportToExcel(List<ApplicationPassword> applicationPasswords, HttpServletResponse response) {
         ApplicationPasswordsExcelExport excelExport = new ApplicationPasswordsExcelExport(applicationPasswords);
         excelExport.export(response);
+    }
+
+    @Override
+    public ApplicationPassword getByUrl(String serverPath, long user_id) {
+        try {
+            var appPassword = appPasswordRepository.findAllByUser_IdOrderByLastModifiedDesc(user_id).
+                    stream().filter(applicationPassword -> applicationPassword.getUrl() != null && applicationPassword.getUrl().
+                            contains(serverPath)).collect(Collectors.toList()).get(0);
+            appPassword.setPassword(WebSecurityConfig.stringEncryptor().decrypt(appPassword.getPassword()));
+            LOG.info("serverName = " + serverPath);
+            return appPassword;
+        }
+        catch (Exception e) {
+            return null;
+        }
     }
 }

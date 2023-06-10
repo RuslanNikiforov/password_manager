@@ -1,6 +1,7 @@
 package ruslan.password_manager.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,6 +38,10 @@ public class ApplicationPassword {
     @Column(name = "password")
     private String password;
 
+    @Column(name = "url")
+    private String url;
+
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(table = "app_passwords", name = "user_id")
     @NotNull

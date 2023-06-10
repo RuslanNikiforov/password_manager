@@ -67,8 +67,8 @@ public class SecurityController {
             userService.updateUser(recoveryPasswordUser);
             long recoveryPasswordUserId = recoveryPasswordUser.getId();
             resetPasswordCode.setUser(recoveryPasswordUser);
-            if (passwordCodeService.userHasCode(recoveryPasswordUserId)) {
-                passwordCodeService.updateResetPasswordCode(code, resetPasswordCode.getSentTime(),
+            if (passwordCodeService.userHasToken(recoveryPasswordUserId)) {
+                passwordCodeService.updateToken(code, resetPasswordCode.getSentTime(),
                         recoveryPasswordUserId);
             } else {
                 passwordCodeService.saveResetPasswordCode(resetPasswordCode);
@@ -124,7 +124,7 @@ public class SecurityController {
         if(user != null) {
             userService.updatePassword(user, passwordResetDto.getPassword());
             userService.saveUser(user);
-            passwordCodeService.deleteResetPasswordCode(passwordResetDto.getCode());
+            passwordCodeService.deleteToken(passwordResetDto.getCode());
             redirectAttributes.addFlashAttribute("message", "Пароль успешно изменён");
             return "redirect:/login";
         }

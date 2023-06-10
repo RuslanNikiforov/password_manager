@@ -46,7 +46,8 @@ public class ApplicationPasswordsExcelExport {
     public void fillValuesToHeaders(Row headerRow, CellStyle style) {
         createCell(headerRow, 0, "Название приложения", style);
         createCell(headerRow, 1, "Дата последнего изменения", style);
-        createCell(headerRow, 2, "Пароль", style);
+        createCell(headerRow, 2, "URL", style);
+        createCell(headerRow, 3, "Пароль", style);
     }
 
     public void createCell(Row row, int columnValue, Object value, CellStyle style) {
@@ -68,7 +69,8 @@ public class ApplicationPasswordsExcelExport {
     public void fillValuesToRow(Row row, CellStyle dataStyle, ApplicationPassword applicationPassword) {
         createCell(row, 0, applicationPassword.getAppName(), dataStyle);
         createCell(row, 1, applicationPassword.getFormattedLastModified(), dataStyle);
-        createCell(row, 2, applicationPassword.getPassword(), dataStyle);
+        createCell(row, 2, applicationPassword.getUrl(), dataStyle);
+        createCell(row, 3, applicationPassword.getPassword(), dataStyle);
     }
 
     public CellStyle getDataStyle() {

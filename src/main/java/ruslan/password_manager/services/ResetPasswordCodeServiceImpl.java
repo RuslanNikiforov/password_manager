@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class ResetPasswordCodeServiceImpl implements ResetPasswordCodeService{
 
     @Autowired
-    ResetPasswordCodeRepository repository;
+    private ResetPasswordCodeRepository repository;
 
     @Override
     public ResetPasswordCode getResetPasswordCode(String code) {
@@ -24,18 +24,18 @@ public class ResetPasswordCodeServiceImpl implements ResetPasswordCodeService{
     }
 
     @Override
-    public boolean userHasCode(Long user_id) {
+    public boolean userHasToken(Long user_id) {
         return repository.countResetPasswordCodeByUserId(user_id) != 0;
     }
 
     @Override
-    public void deleteResetPasswordCode(String code) {
+    public void deleteToken(String code) {
         repository.delete(repository.getByCode(code));
     }
 
     @Transactional
     @Override
-    public void updateResetPasswordCode(String code, LocalDateTime sentTime, Long user_id) {
+    public void updateToken(String code, LocalDateTime sentTime, Long user_id) {
         repository.setResetPasswordCodeToUser(code, sentTime, user_id);
     }
 }

@@ -29,4 +29,6 @@ public interface ApplicationPasswordService {
     boolean addErrorsToModel(BindingResult bindingResult, Model model);
 
     void exportToExcel(List<ApplicationPassword> applicationPasswords, HttpServletResponse response);
+
+    ApplicationPassword getByUrl(String url, long userId);
 }

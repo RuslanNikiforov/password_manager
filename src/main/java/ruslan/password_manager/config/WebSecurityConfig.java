@@ -16,12 +16,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import ruslan.password_manager.services.UserService;
 
+import java.util.Base64;
+
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private UserService userService;
     private final static Logger LOG = LoggerFactory.getLogger(WebSecurityConfig.class);
+
 
     @Autowired
     public WebSecurityConfig(UserService userService) {
@@ -32,15 +35,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable().authorizeRequests().antMatchers( "/*.css", "/resources/**", "/signUp" , "/").
+        http.cors().and().csrf().disable().authorizeRequests().antMatchers( "/*.css", "/resources/**", "/signUp" , "/").
                 permitAll().antMatchers("/passwords**").hasAuthority("USER").
                 antMatchers("/admin**").hasAuthority("ADMIN").
                 antMatchers("/forgetPassword/savePassword**").hasAuthority("CHANGE_PASSWORD").
+                antMatchers("/passwords/update/**", "/passwords/delete/**",
+                        "/passwords/create**", "/passwords/export/excel").
+                hasAuthority("READ_APP_PASSWORDS").
                 antMatchers("/forgetPassword**",
-                        "/forgetPassword/sendCode**", "/forgetPassword/reset**", "/forgetPassword/savePassword**").
+                        "/forgetPassword/sendCode**", "/forgetPassword/reset**").
                 permitAll().anyRequest().authenticated().and().formLogin().loginPage("/login").
-                permitAll().defaultSuccessUrl("/successful_Login").failureUrl("/failure-login").
-                and().logout().logoutUrl("/logout").logoutSuccessUrl("/").deleteCookies("JSESSIONID");
+                permitAll().defaultSuccessUrl("/successful_Login").failureUrl("/failure-login").and().
+                exceptionHandling().accessDeniedPage("/error/403").and().
+                logout().logoutUrl("/logout").logoutSuccessUrl("/").deleteCookies("JSESSIONID").and().
+                httpBasic();
     }
 
     @Bean
@@ -57,6 +65,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return encryptor;
     }
 
+    @Bean
+    public static String generateHttpBasicsAuth(String username, String password) {
+        return "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
+    }
 
     public static String generateSecretKey() {
         return KeyGenerators.string().generateKey();

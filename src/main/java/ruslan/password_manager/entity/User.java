@@ -1,5 +1,6 @@
 package ruslan.password_manager.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -53,6 +54,7 @@ public class User implements UserDetails {
     @Column(table = "user_roles", name = "role")
     private Set<Privilege> privileges = new HashSet<>();
 
+    @JsonManagedReference
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private List<ApplicationPassword> passwords;
 

@@ -19,8 +19,7 @@ public class PasswordGeneratorServiceImpl implements PasswordGeneratorService{
         PasswordGenerator gen = new PasswordGenerator();
         List<CharacterRule> rules = getAllRules();
         setMinimumChars(rules, length);
-        return gen.generatePassword(length, getSpecialCharsRule(), getLowerCaseEnglishCharsRule(),
-                getUpperCaseEnglishCharsRule(), getDigitsRule());
+        return gen.generatePassword(length, rules);
     }
 
     public List<CharacterRule> getAllRules() {
@@ -58,6 +57,6 @@ public class PasswordGeneratorServiceImpl implements PasswordGeneratorService{
 
     public void setMinimumChars(List<CharacterRule> characterRules, int passwordLength) {
         characterRules.forEach(characterRule ->
-                characterRule.setNumberOfCharacters(passwordLength / (AMOUNT_OF_CHARACTER_RULES + 1)));
+                characterRule.setNumberOfCharacters(passwordLength / AMOUNT_OF_CHARACTER_RULES));
     }
 }

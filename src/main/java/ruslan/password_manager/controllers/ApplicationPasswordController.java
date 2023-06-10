@@ -3,14 +3,19 @@ package ruslan.password_manager.controllers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ruslan.password_manager.config.WebSecurityConfig;
 import ruslan.password_manager.entity.ApplicationPassword;
+import ruslan.password_manager.entity.AuthToken2FA;
 import ruslan.password_manager.entity.Privilege;
 import ruslan.password_manager.entity.User;
 import ruslan.password_manager.exceptions.IncorrectTokenException;
@@ -20,8 +25,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/passwords")
@@ -35,18 +42,18 @@ public class ApplicationPasswordController {
 
     private final EmailService emailService;
 
-    private final UsersSessionService usersSessionService;
+    private final AuthToken2FAService authToken2FAService;
 
     private final PasswordGeneratorService passwordGeneratorService;
 
 
     @Autowired
     public ApplicationPasswordController(ApplicationPasswordService appPasswordService, EmailService emailService,
-                                         UsersSessionService usersSessionService,
-                                         PasswordGeneratorService passwordGeneratorService, UserService userService) {
+                                         PasswordGeneratorService passwordGeneratorService, UserService userService,
+                                         AuthToken2FAService authToken2FAService) {
         this.appPasswordService = appPasswordService;
         this.emailService = emailService;
-        this.usersSessionService = usersSessionService;
+        this.authToken2FAService = authToken2FAService;
         this.passwordGeneratorService = passwordGeneratorService;
         this.userService = userService;
     }
@@ -82,7 +89,7 @@ public class ApplicationPasswordController {
 
     @GetMapping("/PopUp")
     public String getPopUp(@AuthenticationPrincipal User user, Model model) {
-        model.addAttribute("isTokenSent", usersSessionService.getUsersTokens().containsKey(user.getId()));
+        model.addAttribute("isTokenSent", false);
         return "popUpToSendTokenInEmail";
     }
 
@@ -115,13 +122,13 @@ public class ApplicationPasswordController {
         return "updateAppPassword";
     }
 
-    @PostMapping("")
+    @PostMapping("/create")
     public String addAppPassword(@Valid @ModelAttribute(name = "app_password") ApplicationPassword applicationPassword,
                                  BindingResult bindingResult, @AuthenticationPrincipal User user, Model model) throws UserPrincipalNotFoundException {
         if (user == null) {
             throw new UserPrincipalNotFoundException("UserPrincipalNotFound");
         }
-        if (appPasswordService.getAll(user.getId()).stream().map(ApplicationPassword::getAppName).toList().
+        if (appPasswordService.getAll(user.getId()).stream().map(ApplicationPassword::getAppName).collect(Collectors.toList()).
                 contains(applicationPassword.getAppName())) {
             bindingResult.addError(new FieldError("appError", "appName",
                     "Приложение с данным названием уже существует"));
@@ -134,7 +141,7 @@ public class ApplicationPasswordController {
         return "redirect:/passwords";
     }
 
-    @PostMapping("/{id}")
+    @PostMapping("/create/{id}")
     public String updateAppPassword(@PathVariable(value = "id") String id,
                                     @Valid @ModelAttribute(name = "app_password") ApplicationPassword applicationPassword,
                                     BindingResult bindingResult, @AuthenticationPrincipal User user, Model model)
@@ -149,41 +156,60 @@ public class ApplicationPasswordController {
         existing.setPassword(applicationPassword.getPassword());
         existing.setAppName(applicationPassword.getAppName());
         existing.setLastModified(LocalDateTime.now());
+        if(existing.getUrl() != null) {
+            existing.setUrl(applicationPassword.getUrl());
+        }
         appPasswordService.save(existing, user.getId());
         return "redirect:/passwords";
     }
 
     @GetMapping("/sendToken")
-    public String sendTokenToEmail(@AuthenticationPrincipal User user, Model model) {
+    public String sendTokenToEmail(@AuthenticationPrincipal User user, Model model, RedirectAttributes redirectAttributes) {
         LOG.info("tokenGonnaBeSend");
         String token = WebSecurityConfig.getAuthToken();
-        emailService.sendEmail(user.getEmail(), "Your auth token", token);
-        usersSessionService.putToken(user.getId(), token);
-        model.addAttribute("isTokenSent", true);
-        return "popUpToSendTokenInEmail";
+        AuthToken2FA authToken2FA = new AuthToken2FA(token);
+        authToken2FA.setUser(user);
+        if(authToken2FAService.userHasToken(user.getId())) {
+            AuthToken2FA oldToken = authToken2FAService.getByUserId(user.getId());
+            if(oldToken.getSentTime().plusMinutes(3).isAfter(LocalDateTime.now())) {
+                redirectAttributes.addFlashAttribute("error", "Токен был отправлен, " +
+                        "запросить новый сможете через " + (180 - ChronoUnit.SECONDS.between
+                        (oldToken.getSentTime(), LocalDateTime.now())) + "сек.");
+                return "redirect:/passwords/#zatemnenie";
+            }
+            authToken2FAService.updateToken(token, authToken2FA.getSentTime(), user.getId());
+        }
+        else{
+            authToken2FAService.saveAuthToken(authToken2FA);
+        }
+        emailService.sendEmail(user.getEmail(), "Ваш токен двухфакторной аутентификации", token);
+        redirectAttributes.addFlashAttribute("message", "Ваш токен был успешно отправлен");
+        return "redirect:/passwords/#zatemnenie";
     }
 
     @PostMapping("/checkToken")
     public String checkToken(@ModelAttribute(name = "token") String token, @AuthenticationPrincipal User user,
-                             Model model) {
+                             Model model, RedirectAttributes redirectAttributes) {
         LOG.info("tokenGonnaBeChecked");
         try {
-            if (usersSessionService.getUsersTokens().get(user.getId()).equals(token)) {
+            if (authToken2FAService.getByUserId(user.getId()).getToken().equals(token)) {
                 LOG.info("Token is correct");
                 user.setPrivileges(userService.addAuthorities(Collections.singletonList(Privilege.READ_APP_PASSWORDS),
                         user.getPrivileges()));
                 userService.updateUser(user);
+                Authentication newAuth = new UsernamePasswordAuthenticationToken(user, user.getPassword(),
+                        user.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(newAuth);
                 return "redirect:/passwords";
             } else {
                 LOG.info("Token incorrect. User Input Token -> " + token + " Actual token -> " +
-                        usersSessionService.getUsersTokens().get(user.getId()));
+                        authToken2FAService.getAuthToken(token));
                 throw new IncorrectTokenException();
             }
         }
         catch (IncorrectTokenException e) {
-            model.addAttribute("hasError", true);
-            model.addAttribute("isTokenSent", true);
-            return "popUpToSendTokenInEmail";
+            redirectAttributes.addFlashAttribute("error", "Неправильный токен");
+            return "redirect:/passwords/#zatemnenie";
         }
     }
 

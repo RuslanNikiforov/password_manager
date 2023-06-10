@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="../resetPassword.css"/>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Сбросить пароль</title>
 </head>
 <body>
 <@security.authorize access="hasAuthority('CHANGE_PASSWORD')">

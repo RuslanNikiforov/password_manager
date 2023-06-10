@@ -40,7 +40,7 @@ public class SignUpController {
                     "[a-z, A-Z], цифры [0-9] и специальные символы _^&@!-#$.");
             bindingResult.addError(passwordError);
         }
-        if(service.getAllWithAdmin().stream().map(User::getEmail).toList().contains(user.getEmail())) {
+        if(service.getAllWithAdmin().stream().map(User::getEmail).collect(Collectors.toList()).contains(user.getEmail())) {
             FieldError emailError = new FieldError("emailError", "email",
                     "Пользователь с данным email уже существует.");
             bindingResult.addError(emailError);
