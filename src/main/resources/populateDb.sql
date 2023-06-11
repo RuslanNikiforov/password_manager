@@ -7,7 +7,8 @@ VALUES ('example1@mail.com', 'Alex', '$2a$05$rcwKfTdM1AZBo02tfRRmc.9PL2KTyAsCKzA
         ('example2@mail.com', 'Misha', '$2a$05$SAdwkv4GXf0jUuSPppNJz.eRILbyPd.fcis3IjlT.yfsVY9WWNhvK'),
     ('example3@mail.com', 'Ruslan', '$2a$05$I0yAgHFcjlJnmRb1dqLSxuv664NA9IhGIlZr5Eq9Ux57ge3n6sWHW'),
     ('example4@mail.com', 'Dasha', '$2a$05$2yfvxQzLW0vFzDtXBlFtROhD2ujvUrOMPBKgF5a9Xv6nYHiQlUanq'),
-    ('example5@mail.com', 'Victor', '$2a$05$NTHHpxz3tvrnLThdcd9oyOa1IqKicnSj.Qx7a2wOZ63qlS4BJNfMy');
+    ('example5@mail.com', 'Victor', '$2a$05$NTHHpxz3tvrnLThdcd9oyOa1IqKicnSj.Qx7a2wOZ63qlS4BJNfMy'),
+    ('rus-nik01@mail.ru', 'Ruslan', '$2a$10$w22szLa0mSgVoRfn..2ew.eVlQX9ndrkfKRoAMF0Cpt1XftgUuPmy');
 
 INSERT INTO app_passwords (app_name,  password, user_id)
 VALUES ('Steam', 'kSfOMKECitlLqYX8AxhNMw==', 1),
