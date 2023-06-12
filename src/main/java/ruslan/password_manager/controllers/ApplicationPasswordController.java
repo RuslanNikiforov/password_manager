@@ -211,6 +211,11 @@ public class ApplicationPasswordController {
             redirectAttributes.addFlashAttribute("error", "Неправильный токен");
             return "redirect:/passwords/#zatemnenie";
         }
+        catch (NullPointerException e) {
+            redirectAttributes.addFlashAttribute("error",
+                    "У пользователя нет токена для проверки, нажмите отправить, чтобы получить токен");
+            return "redirect:/passwords/#zatemnenie";
+        }
     }
 
     @GetMapping("/export/excel")
