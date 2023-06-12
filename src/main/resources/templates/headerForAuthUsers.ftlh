@@ -1,7 +1,6 @@
 <header>
     <div class="header">
         <a class="header-margin" href="/passwords"><h1>Менеджер паролей</h1></a>
-        <a href="/settings/info">Личный кабинет</a>
         <a href="/logout">
             <button>Выйти</button>
         </a>
