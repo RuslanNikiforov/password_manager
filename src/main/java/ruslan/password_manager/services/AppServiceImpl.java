@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 @Service
 public class AppServiceImpl implements AppService {
 
-    public static final String serverName = "http://localhost:8080/";
+    public static final String serverName = "https://password-manager-koda.amvera.io/";
 
     @Override
     public String getAppUrl(HttpServletRequest request) {

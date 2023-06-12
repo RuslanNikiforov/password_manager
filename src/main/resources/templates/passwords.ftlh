@@ -39,42 +39,47 @@
                 ></label>
             <input type="submit" value="Фильтр">
         </form>
-        <table class="table" border="3">
-            <tr>
-                <th>Название приложения</th>
-                <th>Url()</th>
-                <th>Последнее изменение</th>
-                <th>Пароль</th>
-                <th></th>
-                <th></th>
-            </tr>
-            <#if app_passwords?has_content>
-            <#list app_passwords as app_password>
+        <#if app_passwords?has_content>
+            <table class="table" border="3">
                 <tr>
-                    <td>${app_password.appName}</td>
-                    <td><#if app_password.getUrl()?has_content>${app_password.url}<#else></#if></td>
-                    <td>${app_password.getFormattedLastModified()}</td>
-                    <td><#if app_password.getPassword()?has_content>${app_password.password}<#else>********</#if></td>
-                    <td style="width: 50px"><a href="/passwords/delete/${app_password.id}">Удалить</a></td>
-                    <td style="width: 50px"><a href="/passwords/update/${app_password.id}">Изменить</a></td>
+                    <th>Название приложения</th>
+                    <th>Url</th>
+                    <th>Последнее изменение</th>
+                    <th>Пароль</th>
+                    <th></th>
+                    <th></th>
                 </tr>
-            </#list>
-            <tr class="pages_font">
 
-                <td colspan="6" id="pages">
-                    <div class="pages_wrapper">Страницы
-                        <#list 1..amount_of_pages as i>
-                            <a>
-                                <button class="pages_font btn btn-link" id="btn-link${i}"
-                                        onclick="addParamsToUrlAndRefresh(${i})">${i}</button>
-                            </a>
-                        </#list>
-                    </div>
-                </td>
+                <#list app_passwords as app_password>
+                    <tr>
+                        <td>${app_password.appName}</td>
+                        <td><#if app_password.getUrl()?has_content>${app_password.url}<#else></#if></td>
+                        <td>${app_password.getFormattedLastModified()}</td>
+                        <td><#if app_password.getPassword()?has_content>${app_password.password}<#else>********</#if></td>
+                        <td style="width: 50px"><a href="/passwords/delete/${app_password.id}">Удалить</a></td>
+                        <td style="width: 50px"><a href="/passwords/update/${app_password.id}">Изменить</a></td>
+                    </tr>
+                </#list>
+                <tr class="pages_font">
 
-            </tr>
-        </table>
+                    <td colspan="6" id="pages">
+                        <div class="pages_wrapper">Страницы
+                            <#list 1..amount_of_pages as i>
+                                <a>
+                                    <button class="pages_font btn btn-link" id="btn-link${i}"
+                                            onclick="addParamsToUrlAndRefresh(${i})">${i}</button>
+                                </a>
+                            </#list>
+                        </div>
+                    </td>
+
+                </tr>
+            </table>
+        <#else>
+            <p>В данный момент вы не создали еще ни одного пароля приложения</p>
         </#if>
+
+
         <div class="d-flex flex-row align-items-center">
             <a href="/passwords/create">
                 <button>Добавить</button>
@@ -83,7 +88,7 @@
                 <a class="pl-4" href="/passwords/export/excel">Экспортировать в Excel</a>
             </@security.authorize>
             <a href="#zatemnenie">
-                <button class="btn btn-block btn-dark ml-4">Показать пароли</button>
+                <button class="btn btn-block btn-dark ml-4">Пройти двухфакторную аутентификацию</button>
             </a>
         </div>
     </div>
@@ -111,17 +116,17 @@
     </div>
     <br>
     <div class="ml-4">
-    <h3>Сгенерировать пароль</h3>
-    <form class="mb-0" method="get" action="/passwords">
-        <p>Количество символов:
-            <span id="slider_value" style="color:red">16</span></p>
-        8<input type="range" id="genPassLength" name="genPassLength" value="16" min="8" max="32" step="8"
-                onchange="document.getElementById('slider_value').innerHTML = this.value">32
-        <input type="submit" value="Сгенерировать">
-    </form>
-    <#if generatedPassword?has_content><p>Пароль: ${generatedPassword}</p></#if>
+        <h3>Сгенерировать пароль</h3>
+        <form class="mb-0" method="get" action="/passwords">
+            <p>Количество символов:
+                <span id="slider_value" style="color:red">16</span></p>
+            8<input type="range" id="genPassLength" name="genPassLength" value="16" min="8" max="32" step="8"
+                    onchange="document.getElementById('slider_value').innerHTML = this.value">32
+            <input type="submit" value="Сгенерировать">
+        </form>
+        <#if generatedPassword?has_content><p>Пароль: ${generatedPassword}</p></#if>
     </div>
 </main>
-    <#include "footer.ftlh">
+<#include "footer.ftlh">
 </body>
 </html>
